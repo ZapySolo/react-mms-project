@@ -4,11 +4,12 @@
 // process.env.AWS_ACCESS_KEY_ID = "AKIAS4VFCTK6HVLI3CG5";
 // process.env.AWS_SECRET_ACCESS_KEY = "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";
 import _ from 'lodash';
+const config = require('../config.js');
 const AWS = require('aws-sdk');
 AWS.config.update({
-    accessKeyId: 'AKIAS4VFCTK6HVLI3CG5',
-    secretAccessKey: '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',
-    region: 'us-east-2',
+    accessKeyId: config.accessKeyId,
+    secretAccessKey: config.secretAccessKey,
+    region: config.region,
 });
 
 class Repository {
