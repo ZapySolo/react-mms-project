@@ -39,6 +39,8 @@ import AddProduct from './AddProduct';
 import { Report } from '@material-ui/icons';
 import Avatar from '@material-ui/core/Avatar';
 
+import Button from '@material-ui/core/Button';
+
 import _ from 'lodash';
 
 const drawerWidth = 240;
@@ -224,6 +226,17 @@ export default function Dashboard() {
                     </ListItem>
                 </div>
             </List>
+            <Divider />
+            <div style={{display:'flex', flexGrow:1}}>
+                {" "}
+            </div>
+            <Divider />
+            <Button style={{marginBottom:30}} onClick={()=>{
+                localStorage.removeItem('@client_data');
+                window.location.reload(false);
+                }}>
+                Logout
+            </Button>
         </Drawer>
         <main className={classes.content}>
             <div className={classes.appBarSpacer} />
