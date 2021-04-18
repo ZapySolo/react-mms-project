@@ -15,6 +15,47 @@ AWS.config.update({
 class Repository {
     constructor() {
         this.db = new AWS.DynamoDB.DocumentClient();
+        this.email = new AWS.SES({apiVersion: '2010-12-01'});
+        this.SENDER_EMAIL_ADDRESS = '21nikhilpatil1998@gmail.com';
+
+        this.sendEmail = (receiverEmail, message) => {
+            return new Promise((resolve, reject) => {
+                let result = this.email.sendEmail({
+                    Destination: { /* required */
+                      // CcAddresses: [
+                      //   'EMAIL_ADDRESS',
+                      //   /* more items */
+                      // ],
+                      ToAddresses: [
+                          receiverEmail
+                      ]
+                    },
+                    Message: { /* required */
+                      Body: { /* required */
+                        Html: {
+                         Charset: "UTF-8",
+                         Data: "<div>"+message+"</div>"
+                        },
+                        Text: {
+                         Charset: "UTF-8",
+                         Data: message
+                        }
+                       },
+                       Subject: {
+                        Charset: 'UTF-8',
+                        Data: message
+                       }
+                      },
+                    Source: this.SENDER_EMAIL_ADDRESS, /* required */
+                    //   ReplyToAddresses: [
+                    //      'EMAIL_ADDRESS',
+                    //     /* more items */
+                    //   ],
+                }).promise();
+                result.then(data => {resolve(data)});
+                result.catch(err => {reject(err)});
+            })
+        }
 
         /**
          * 

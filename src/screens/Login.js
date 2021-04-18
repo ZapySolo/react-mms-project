@@ -16,6 +16,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { sha256, sha224 } from 'js-sha256';
 import Repository from '../utilities/dynamodb/dynamoDB';
 import { useSnackbar } from 'notistack';
+import { v4 as uuidv4 } from 'uuid';
+
 const db = new Repository();
 
 function Copyright() {
@@ -56,6 +58,17 @@ export default function SignInSide(props) {
         props.onLogin(true)
         localStorage.setItem('@client_data', JSON.stringify(loginResult[0]));
       } else {
+        let forgotPasswordResult = await db.findMany('mms_forgot_password', {email: loginEmail, passwordHash: sha256(loginPassword)});
+        if(forgotPasswordResult.length > 0){
+          if(new Date(forgotPasswordResult[0].expire).getTime() > new Date().getTime()){
+            loginResult = await db.findMany('mms_users', {email: forgotPasswordResult[0].email});
+            localStorage.setItem('@client_data', JSON.stringify(loginResult[0]));
+            enqueueSnackbar('Login Success!', { variant: 'success', anchorOrigin:{vertical: 'top', horizontal: 'center'},autoHideDuration:2000 });
+            props.onLogin(true);
+          } else {
+            enqueueSnackbar('Login has Expired!', { variant: 'error', anchorOrigin:{vertical: 'top', horizontal: 'center'}, autoHideDuration:5000 });
+          }
+        }
         setLoginError(true);
       }
     } catch(err){
@@ -85,6 +98,30 @@ export default function SignInSide(props) {
     //     "email": "temp1@email.com",
     //     "name": "temp 1"
     // });
+  }
+
+  const handleForgotPassword = async () => {
+    if(!loginEmail){
+      return;
+    }
+    try{
+      let uuid = uuidv4()
+      let newPassword = sha256(uuid);
+      newPassword = newPassword.substr(0, 8);
+      let newPasswordHash = sha256(newPassword);
+      let sendEmailResult = await db.sendEmail(loginEmail, `Your new password is ${newPassword}`);
+      if(sendEmailResult) {
+        enqueueSnackbar('New Password is successfully sent to your email!', { variant: 'success', anchorOrigin:{vertical: 'top', horizontal: 'center'},autoHideDuration:2000 });
+        let res = await db.insert('mms_forgot_password', {
+          _id: uuid,
+          email: loginEmail,
+          passwordHash: newPasswordHash,
+          expire: new Date(new Date().getTime() + 24*60*60*1000).toISOString()
+        });
+      }
+    } catch(err){
+      enqueueSnackbar('No Such Email Found!', { variant: 'error', anchorOrigin:{vertical: 'top', horizontal: 'center'},autoHideDuration:2000 });
+    }
   }
 
   return (
@@ -130,6 +167,16 @@ export default function SignInSide(props) {
               id="password"
               autoComplete="current-password"
             />
+            <Grid container>
+              <Grid item xs>
+                
+              </Grid>
+              <Grid item>
+              <Link onClick={()=>{handleForgotPassword()}}>
+                  Forgot password?
+                </Link>
+              </Grid>
+            </Grid>
             <Button
               //type="submit"
               fullWidth
@@ -143,6 +190,7 @@ export default function SignInSide(props) {
             > 
               {loading?<CircularProgress color="inherit" />:'Sign In'}
             </Button>
+            
             <Copyright/>
           </form>
         </div>

@@ -1,13 +1,25 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
+import Repository from '../utilities/dynamodb/dynamoDB';
+
+const db = new Repository();
 
 const drawerWidth = 240;
 
 export default function Dashboard() {
+
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
 
+  React.useEffect(()=>{
+    sendEmail();
+  }, [])
+
+  const sendEmail = async () => {
+    let res = await db.sendEmail('nickpt.0699@gmail.com', 'This is a ssample mail!');
+    console.log('sendEmail',res);
+  }
   return (
     <Paper >
         {'Reports Page'}
