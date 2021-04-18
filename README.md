@@ -1,8 +1,8 @@
 # react-mms-project
 Medicine Management Project build using React.Js
 
-Install Node
+Install Node :https://nodejs.org/en/download/ <-- download and hit next untill the setup is completed
 
-Inside the project run 'npn install'
+Open the project inside terminal and run 'npm install && npm start'
 
-Done
+Done, Leave your feedback!
